@@ -42,7 +42,7 @@ def create_new():
             locked = str(input("Is this cell locked? y/n (Exlcuded from fund redistribution feature) "))
             if locked == 'y':
                 locked = "true"
-            elif locked == 'n':
+            else:
                 locked = "false"
             
             ws['A' + str(5 + i)] = cat
@@ -52,3 +52,53 @@ def create_new():
         wb.save(file_path) 
         print("File creation successful...")  
         
+def allocate_funds(ws):
+    if ws['B3'].value > 0:
+        if input("You have an unaccounted for balance of $" + str(ws['B3'].value) + ", would you like to desigate a category? y/n ") == 'y':
+            for i in range(ws['B4'].value):
+                check = True
+                while check:
+                    amt = float(input("How much would you like to put in the " + str(ws['A' + str(i + 6)].value) + " category? $"))
+                    if amt <= ws['B3'].value:
+                        ws['B' + str(i + 6)] = amt + ws['B' + str(i + 6)].value
+                        ws['B3'] = ws['B3'].value - amt
+                        check = False
+                    elif amt > ws['B3'].value:
+                        print("That is more money than you have remaining to allocate. Please allocate $" + str(ws['B3'].value) + " or less to this category.")
+   
+def withdraw_category(ws, debt):
+    while debt > 0:
+            print("Which category would you like to withdraw from? (Numbered)")
+            for i in range(1, ws['B4'].value + 1):
+                print(str(i) + ". " + ws['A' + str(i+5)].value + ": $" +  str(ws['B' + str(i+5)].value))
+            pull = int(input())
+            amt = float(input("How much would you like to withdraw from " + ws['A' + str(pull+5)].value + "? $"))
+            debt -= amt
+            ws['B' + str(pull+5)] = ws['B' + str(pull+5)].value - amt
+            if amt <= ws['B' + str(pull+5)].value:
+                print("Withdrawal from " + ws['A' + str(pull+5)].value + " was successful.")
+            else:
+                print("You have withdrawn $" + str(amt) + " from " + ws['A' + str(pull+5)].value + ". Your balance in that category did not cover the withdraw and is now negative.")
+                print("It is reccomended you move money from other categories to cover this deficit or to allocate money during your next deposit.")
+
+def deposit(ws):
+    if input("Have you made a deposit into savings that you would like to record? y/n ") == 'y':
+        amt = float(input("How much? $"))
+        ws['B2'] = ws['B2'].value + amt
+        ws['B3'] = ws['B3'].value + amt
+        print("Your new total balance is $" + str(ws['B2'].value))
+
+def withdrawl(ws):
+    if input("Have you made a withdrawal from savings that you would like to record? y/n ") == 'y':
+        debt = float(input("How much? $"))
+        ws['B2'] = ws['B2'].value - debt
+        if ws['B3'].value >= debt:
+            ws['B3'] = ws['B3'].value - debt
+            print("The money withdrawal has been removed from the unaccounted for funds, no further action is needed.")
+        elif ws['B3'].value > 0:
+            debt -= ws['B3'].value
+            ws['B3'] =  0
+            print("Some of the money withdrawal has been removed from the unaccounted for funds, further action is needed for the remaining $" + str(debt) + " withdrawal balance.")
+            withdraw_category(ws, debt)
+        else:
+            withdraw_category(ws, debt)

@@ -1,14 +1,16 @@
 from source import *
 
-create_new()
+try:
+    wb = load_workbook(filename = file_path)
+    ws = wb['Sheet']
+    deposit(ws)
+    withdrawl(ws)
+except  FileNotFoundError as error:
+    create_new()
+    wb = load_workbook(filename = file_path)
+    ws = wb['Sheet']
+    
 
-wb = load_workbook(filename = file_path)
-ws = wb.active
-
-
-
-
-
-
+allocate_funds(ws)
 
 wb.save(file_path) 
