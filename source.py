@@ -20,7 +20,7 @@ def create_new():
         ws['B1'] = "Amount ($)"
         ws['C1'] = "Locked?"
         ws['A2'] = "Total Balance"
-        ws['B2'] = float(input("What is your total balance? "))
+        ws['B2'] = float(input("What is your total balance? $"))
         ws['C2'] = "false"
         ws['A3'] = "Unaccounted Funds"
         ws['B3'] = ws['B2'].value
@@ -55,17 +55,29 @@ def create_new():
 def allocate_funds(ws):
     if ws['B3'].value > 0:
         if input("You have an unaccounted for balance of $" + str(ws['B3'].value) + ", would you like to desigate a category? y/n ") == 'y':
-            for i in range(ws['B4'].value):
+            print("Which categories would you like to depoist into?")
+            for i in range(ws['B4'].value): # str(ws['A' + str(i + 6)].value)
+                print(str(i+1) + ". " + str(ws['A' + str(i + 6)].value))
+            ans = list(map(int, input("Please select the category(ies) above that you wish to deposit into (i.e. \"1 2 3\"): ").strip().split()))[:ws['B4'].value]
+            for i in ans:
+                k = i -1
                 check = True
                 while check:
-                    amt = float(input("How much would you like to put in the " + str(ws['A' + str(i + 6)].value) + " category? $"))
-                    if amt <= ws['B3'].value:
-                        ws['B' + str(i + 6)] = amt + ws['B' + str(i + 6)].value
+                    amt = float(input("How much would you like to put in the " + str(ws['A' + str((i-1) + 6)].value) + " category? $"))
+                    if amt == ws['B3'].value:
+                        print("Funds have successfully been alocated.")
+                        ws['B' + str(k + 6)] = amt + ws['B' + str(k + 6)].value
+                        ws['B3'] = ws['B3'].value - amt
+                        check = False
+                        break
+                    elif amt < ws['B3'].value:
+                        print("Funds have successfully been allocated but there is remaining money left unallocated.")
+                        ws['B' + str(k + 6)] = amt + ws['B' + str(k + 6)].value
                         ws['B3'] = ws['B3'].value - amt
                         check = False
                     elif amt > ws['B3'].value:
-                        print("That is more money than you have remaining to allocate. Please allocate $" + str(ws['B3'].value) + " or less to this category.")
-   
+                        print("You cannot allocate more funds than you have deposited. Please try again.")
+                        
 def withdraw_category(ws, debt):
     while debt > 0:
             print("Which category would you like to withdraw from? (Numbered)")
@@ -74,12 +86,12 @@ def withdraw_category(ws, debt):
             pull = int(input())
             amt = float(input("How much would you like to withdraw from " + ws['A' + str(pull+5)].value + "? $"))
             debt -= amt
-            ws['B' + str(pull+5)] = ws['B' + str(pull+5)].value - amt
             if amt <= ws['B' + str(pull+5)].value:
                 print("Withdrawal from " + ws['A' + str(pull+5)].value + " was successful.")
             else:
                 print("You have withdrawn $" + str(amt) + " from " + ws['A' + str(pull+5)].value + ". Your balance in that category did not cover the withdraw and is now negative.")
                 print("It is reccomended you move money from other categories to cover this deficit or to allocate money during your next deposit.")
+            ws['B' + str(pull+5)] = ws['B' + str(pull+5)].value - amt
 
 def deposit(ws):
     if input("Have you made a deposit into savings that you would like to record? y/n ") == 'y':

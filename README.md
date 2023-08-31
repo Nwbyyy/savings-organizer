@@ -2,7 +2,7 @@
 Keep track of your savings :)
 
 ## TODO:
-- [ ] Get API access (harder than i thought :C)
+~~- [ ] Get API access (harder than i thought :C)~~ (not happening :skull:)
 - [x] If i cant, rework project to have manual data entry instead (lame and cringe)
 - [x] Read file off select location in desktop as to not upload them to github :sweat:
 - [x] Have a seperate file that keeps track of money accounted for
